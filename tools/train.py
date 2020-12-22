@@ -66,6 +66,8 @@ def parse_args():
 def main():
     args = parse_args()
     cfg = Config.fromfile(args.config)
+    # print(cfg.log_level) # INFO
+    
     if args.options is not None:
         cfg.merge_from_dict(args.options)
     # set cudnn_benchmark
@@ -79,18 +81,25 @@ def main():
         # use config filename as default work_dir if cfg.work_dir is None
         cfg.work_dir = osp.join('./work_dirs',
                                 osp.splitext(osp.basename(args.config))[0])
+    # print(cfg.work_dir) # ./work_dirs/res50_coco_256x192
+    # os.path.basename # 返回path最后的文件名。若path以/或\结尾，那么就会返回空值
+    # os.path.splittext # 分离文件名和扩展名
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
     if args.gpu_ids is not None:
         cfg.gpu_ids = args.gpu_ids
     else:
         cfg.gpu_ids = range(1) if args.gpus is None else range(args.gpus)
-
+    # print(cfg.gpu_ids) # range(0,1),range数据类型,实际上只有0，转换为列表中之后list(range(0,1))=[0]
+    # print(args.gpus) # None
+    # print(args.autoscale_lr) # False
     if args.autoscale_lr:
         # apply the linear scaling rule (https://arxiv.org/abs/1706.02677)
         cfg.optimizer['lr'] = cfg.optimizer['lr'] * len(cfg.gpu_ids) / 8
-
+    
     # init distributed env first, since logger depends on the dist info.
+    # print(args.launcher) # pytorch
+
     if args.launcher == 'none':
         distributed = False
     else:
@@ -98,6 +107,8 @@ def main():
         init_dist(args.launcher, **cfg.dist_params)
 
     # create work_dir
+    # print(osp.abspath(cfg.work_dir)) # /home/sunzheng/Keypoint_Detection/mmpose/work_dirs/res50_coco_256x192
+    
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     # init the logger before other steps
     timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
@@ -126,10 +137,14 @@ def main():
         set_random_seed(args.seed, deterministic=args.deterministic)
     cfg.seed = args.seed
     meta['seed'] = args.seed
+    # print(meta)
 
     model = build_posenet(cfg.model)
-    datasets = [build_dataset(cfg.data.train)]
+    # print(model) # ????
+    # print(isinstance(cfg.model,list)) # False
 
+
+    datasets = [build_dataset(cfg.data.train)]
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline
@@ -150,7 +165,7 @@ def main():
         validate=(not args.no_validate),
         timestamp=timestamp,
         meta=meta)
-
+    '''
 
 if __name__ == '__main__':
     main()
