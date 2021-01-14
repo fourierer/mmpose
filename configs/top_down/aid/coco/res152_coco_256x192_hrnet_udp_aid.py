@@ -4,7 +4,7 @@ resume_from = None
 dist_params = dict(backend='nccl')
 workflow = [('train', 1)]
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metric='mAP', key_indicator='AP')
+evaluation = dict(interval=100, metric='mAP', key_indicator='AP')
 
 optimizer = dict(
     type='Adam',
@@ -27,7 +27,6 @@ log_config = dict(
     ])
 
 target_type = 'CombinedTarget'
-# target_type = 'GaussianHeatMap'
 channel_cfg = dict(
     num_output_channels=17,
     dataset_joints=17,
@@ -41,43 +40,13 @@ channel_cfg = dict(
 # model settings
 model = dict(
     type='TopDown',
-    pretrained='https://download.openmmlab.com/mmpose/'
-    'pretrain_models/hrnet_w32-36af842e.pth',
-    backbone=dict(
-        type='HRNet',
-        in_channels=3,
-        extra=dict(
-            stage1=dict(
-                num_modules=1,
-                num_branches=1,
-                block='BOTTLENECK',
-                num_blocks=(4, ),
-                num_channels=(64, )),
-            stage2=dict(
-                num_modules=1,
-                num_branches=2,
-                block='BASIC',
-                num_blocks=(4, 4),
-                num_channels=(32, 64)),
-            stage3=dict(
-                num_modules=4,
-                num_branches=3,
-                block='BASIC',
-                num_blocks=(4, 4, 4),
-                num_channels=(32, 64, 128)),
-            stage4=dict(
-                num_modules=3,
-                num_branches=4,
-                block='BASIC',
-                num_blocks=(4, 4, 4, 4),
-                num_channels=(32, 64, 128, 256))),
-    ),
+    # pretrained='torchvision://resnet152',
+    pretrained='work_dirs/res152_coco_256x192_hrnet_udp/epoch_210.pth',
+    backbone=dict(type='ResNet', depth=152),
     keypoint_head=dict(
         type='TopDownSimpleHead',
-        in_channels=32,
+        in_channels=2048,
         out_channels=3 * channel_cfg['num_output_channels'],
-        num_deconv_layers=0,
-        extra=dict(final_conv_kernel=1, ),
     ),
     train_cfg=dict(),
     test_cfg=dict(
@@ -104,8 +73,10 @@ data_cfg = dict(
     bbox_thr=1.0,
     use_gt_bbox=False,
     image_thr=0.0,
+    # bbox_file='data/coco/person_detection_results/'
+    # 'COCO_val2017_detections_AP_H_56_person.json',
     bbox_file='data/coco/person_detection_results/'
-    'COCO_val2017_detections_AP_H_56_person.json',
+    'COCO_val2017_detections_htc_multiscale.json',
 )
 
 train_pipeline = [
@@ -119,6 +90,7 @@ train_pipeline = [
         type='TopDownGetRandomScaleRotation', rot_factor=45,
         scale_factor=0.35),
     dict(type='TopDownAffine', use_udp=True),
+    dict(type='Cutout'),
     dict(type='ToTensor'),
     dict(
         type='NormalizeTensor',

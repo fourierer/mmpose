@@ -143,13 +143,13 @@ def main():
     # print(model) # ????
     # print(isinstance(cfg.model,list)) # False
 
-
+    
     datasets = [build_dataset(cfg.data.train)]
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline
         datasets.append(build_dataset(val_dataset))
-
+    
     if cfg.checkpoint_config is not None:
         # save mmpose version, config file content
         # checkpoints as meta data
@@ -165,7 +165,7 @@ def main():
         validate=(not args.no_validate),
         timestamp=timestamp,
         meta=meta)
-    '''
+    
 
 if __name__ == '__main__':
     main()

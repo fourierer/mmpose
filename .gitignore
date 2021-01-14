@@ -120,3 +120,8 @@ work_dirs/
 *.pth
 
 *.DS_Store
+
+# added by sunzheng
+# data and model
+/data
+/work_dirs

@@ -3,8 +3,8 @@ load_from = None
 resume_from = None
 dist_params = dict(backend='nccl')
 workflow = [('train', 1)]
-checkpoint_config = dict(interval=10)
-evaluation = dict(interval=10, metric='mAP', key_indicator='AP')
+checkpoint_config = dict(interval=1)
+evaluation = dict(interval=1, metric='mAP', key_indicator='AP')
 
 optimizer = dict(
     type='Adam',
@@ -68,8 +68,10 @@ data_cfg = dict(
     bbox_thr=1.0,
     use_gt_bbox=False,
     image_thr=0.0,
+    # bbox_file='data/coco/person_detection_results/'
+    # 'COCO_val2017_detections_AP_H_56_person.json',
     bbox_file='data/coco/person_detection_results/'
-    'COCO_val2017_detections_AP_H_56_person.json',
+    'COCO_val2017_detections_htc_multiscale.json',
 )
 
 train_pipeline = [
