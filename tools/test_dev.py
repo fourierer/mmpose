@@ -75,7 +75,7 @@ def main():
 
     # build the dataloader
     # TODO: support multiple images per gpu (only minor changes are needed)
-    dataset = build_dataset(cfg.data.val, dict(test_mode=True))
+    dataset = build_dataset(cfg.data.test, dict(test_mode=True))
     data_loader = build_dataloader(
         dataset,
         samples_per_gpu=1,
@@ -89,7 +89,6 @@ def main():
     if fp16_cfg is not None:
         wrap_fp16_model(model)
     _ = load_checkpoint(model, args.checkpoint, map_location='cpu')
-
     # for backward compatibility
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
@@ -103,15 +102,34 @@ def main():
         outputs = multi_gpu_test(model, data_loader, args.tmpdir,
                                  args.gpu_collect)
     # print(type(outputs)) # list
-    # print(len(outputs))
+    # print(outputs)
     rank, _ = get_dist_info()
     eval_config = cfg.get('eval_config', {})
     eval_config = merge_configs(eval_config, dict(metric=args.eval))
+    args.out = args.work_dir + '/test_dev2017_results_kps.json'
     if rank == 0:
         if args.out:
             print(f'\nwriting results to {args.out}')
-            mmcv.dump(outputs, args.out)
-
+            results = []
+            for img in outputs:
+                for i, person in enumerate(img[0]):
+                    kps = person[:, :3]
+                    kps = kps.reshape((-1)).round(3).tolist()
+                    kps = [round(k, 3) for k in kps]
+                    score = round(float(img[1][i]), 3)
+                    id = ''
+                    for key in img[2][66:78]:
+                        id = id + key
+                    results.append({
+                        'category_id': int(1),
+                        'image_id': int(id),
+                        'keypoints': kps,
+                        'score': score
+                    })
+            with open(args.out,'w') as fid:
+                import json
+                json.dump(results, fid)
+            # mmcv.dump(outputs, args.out)
         print(dataset.evaluate(outputs, args.work_dir, **eval_config))
 
 

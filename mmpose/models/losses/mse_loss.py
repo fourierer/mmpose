@@ -146,3 +146,50 @@ class JointsOHKMMSELoss(nn.Module):
         losses = torch.cat(losses, dim=1)
 
         return self._ohkm(losses)
+
+if __name__=='__main__':
+    '''
+    从下面代码的调试结果来看，OHKM实际上是取top-k个关键点的平均损失进行反传
+    '''
+    def ohkm(loss):
+        ohkm_loss = 0.
+        N = len(loss) # 64
+        for i in range(N):
+            sub_loss = loss[i]
+            _, topk_idx = torch.topk(
+                sub_loss, k=8, dim=0, sorted=False)
+            # print(topk_idx) # 损失值最大的k个关键点的索引，如tensor([ 8, 16, 15,  4,  3,  5,  2, 14])
+            tmp_loss = torch.gather(sub_loss, 0, topk_idx)
+            # print(tmp_loss.size()) # torch.Size([8])
+            ohkm_loss += torch.sum(tmp_loss) / 8
+        ohkm_loss /= N
+        return ohkm_loss
+    
+
+    criterion = nn.MSELoss(reduction='none')
+    output = torch.randn(64,17,48,64)
+    target = torch.randn(64,17,48,64)
+    batch_size = output.size(0)
+    num_joints = output.size(1)
+    if num_joints < 8:
+        raise ValueError(f'topk ({self.topk}) should not '
+                         f'larger than num_joints ({num_joints}).')
+    heatmaps_pred = output.reshape(
+            (batch_size, num_joints, -1)).split(1, 1)
+    heatmaps_gt = target.reshape((batch_size, num_joints, -1)).split(1, 1)
+    # print(len(heatmaps_pred)) # 17
+    # print(heatmaps_pred[0].size()) # torch.Size([64,1,3072])
+    losses = []
+    for idx in range(num_joints):
+        heatmap_pred = heatmaps_pred[idx].squeeze(1)
+        # print(heatmap_pred.size()) # torch.Size([64,3072])
+        heatmap_gt = heatmaps_gt[idx].squeeze(1)
+        losses.append(criterion(heatmap_pred, heatmap_gt))
+    # print(len(losses)) # 17
+    # print(losses[0].size()) # torch.Size([64,3072])
+    losses = [loss.mean(dim=1).unsqueeze(dim=1) for loss in losses]
+    losses = torch.cat(losses, dim=1)
+    # print(len(losses)) # 64
+    # print(losses[0].size()) #torch.Size([17])
+
+    final_loss = ohkm(losses)

@@ -40,8 +40,7 @@ channel_cfg = dict(
 # model settings
 model = dict(
     type='TopDown',
-    # pretrained='torchvision://resnet152',
-    pretrained='work_dirs/res152_coco_256x192_hrnet_udp/epoch_45.pth',
+    pretrained='/mnt/cfs/algorithm/users/zheng.sun/models/imagenet_resnet/resnet152-b121ed2d.pth',
     backbone=dict(type='ResNet', depth=152),
     keypoint_head=dict(
         type='TopDownSimpleHead',
@@ -71,12 +70,12 @@ data_cfg = dict(
     oks_thr=0.9,
     vis_thr=0.2,
     bbox_thr=1.0,
-    use_gt_bbox=True,
+    use_gt_bbox=False,
     image_thr=0.0,
-    # bbox_file='data/coco/person_detection_results/'
-    # 'COCO_val2017_detections_AP_H_56_person.json',
     bbox_file='data/coco/person_detection_results/'
-    'COCO_val2017_detections_htc_multiscale.json',
+    'COCO_val2017_detections_AP_H_56_person.json',
+    # bbox_file='data/coco/person_detection_results/'
+    # 'COCO_val2017_detections_htc_multiscale.json',
 )
 
 train_pipeline = [

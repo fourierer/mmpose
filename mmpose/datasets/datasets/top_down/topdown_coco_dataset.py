@@ -230,7 +230,8 @@ class TopDownCocoDataset(TopDownBaseDataset):
         aspect_ratio = self.ann_info['image_size'][0] / self.ann_info[
             'image_size'][1]
         center = np.array([x + w * 0.5, y + h * 0.5], dtype=np.float32)
-
+        
+        # 框的中心抖动，可以视为一种数据增强，提高模型性能
         if (not self.test_mode) and np.random.rand() < 0.3:
             center += 0.4 * (np.random.rand(2) - 0.5) * [w, h]
 

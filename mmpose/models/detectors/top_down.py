@@ -16,6 +16,9 @@ from .base import BasePose
 
 
 @POSENETS.register_module()
+# TopDown = POSENETS.register_module(TopDown)
+# 使用Registry的类实例POSENETS中的register_module函数来修饰TopDown并返回给TopDown
+# 通过阅读Registry的源码得知，TopDown作为参数给POSENETS这个类实例赋了值，同时返回的TopDown赋值给了train.py中的model
 class TopDown(BasePose):
     """Top-down pose detectors.
 

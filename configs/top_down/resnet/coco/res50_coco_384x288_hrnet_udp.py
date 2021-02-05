@@ -40,8 +40,7 @@ channel_cfg = dict(
 # model settings
 model = dict(
     type='TopDown',
-    # pretrained='torchvision://resnet50',
-    pretrained='work_dirs/res50_coco_384x288_hrnet_udp/epoch_119.pth',
+    pretrained='/mnt/cfs/algorithm/users/zheng.sun/models/imagenet_resnet/resnet50-19c8e357.pth',
     backbone=dict(type='ResNet', depth=50),
     keypoint_head=dict(
         type='TopDownSimpleHead',

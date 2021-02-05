@@ -109,7 +109,8 @@ class EvalHook(Hook):
             mmcv.dump(self.best_json, json_path)
 
     def evaluate(self, runner, results):
-        """Evaluate the results.
+        """
+        Evaluate the results.
 
         Args:
             runner (:obj:`mmcv.Runner`): The underlined training runner.

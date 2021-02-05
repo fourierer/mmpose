@@ -139,12 +139,19 @@ def main():
     meta['seed'] = args.seed
     # print(meta)
 
-    model = build_posenet(cfg.model)
-    # print(model) # ????
+    model = build_posenet(cfg.model) # TopDown类
+    # print(type(model)) # <class 'mmpose.models.detectors.top_down.TopDown'>
+    # print(cfg.model)
+    # print(cfg.model.pop('type'))
+    # print(type(cfg.model)) # <class 'mmcv.utils.config.ConfigDict'>
     # print(isinstance(cfg.model,list)) # False
+    # print(isinstance(cfg.model,dict)) # True
 
-    
     datasets = [build_dataset(cfg.data.train)]
+    # print(isinstance(datasets,(list,tuple))) # 判断datasets是否是list和tuple其中一个类型
+    # print(type(datasets)) # <class 'list'>
+    # print(datasets) # [<mmpose.datasets.datasets.top_down.topdown_coco_dataset.TopDownCocoDataset object at 0x7fe79ab680d0>]
+    # len(cfg.workflow)=1
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline
@@ -157,6 +164,12 @@ def main():
             mmpose_version=__version__ + get_git_hash(digits=7),
             config=cfg.pretty_text,
         )
+    # print(cfg.keys())
+    # print(distributed) # True
+    # print(not args.no_validate) # True
+    # print(timestamp) # 20210202_151850,运行时间
+    # print(meta)
+
     train_model(
         model,
         datasets,
@@ -165,7 +178,6 @@ def main():
         validate=(not args.no_validate),
         timestamp=timestamp,
         meta=meta)
-    
 
 if __name__ == '__main__':
     main()

@@ -4,7 +4,7 @@ resume_from = None
 dist_params = dict(backend='nccl')
 workflow = [('train', 1)]
 checkpoint_config = dict(interval=1)
-evaluation = dict(interval=1, metric='mAP', key_indicator='AP')
+evaluation = dict(interval=200, metric='mAP', key_indicator='AP')
 
 optimizer = dict(
     type='Adam',
@@ -39,7 +39,7 @@ channel_cfg = dict(
 # model settings
 model = dict(
     type='TopDown',
-    pretrained='torchvision://resnet50',
+    pretrained='/mnt/cfs/algorithm/users/zheng.sun/models/imagenet_resnet/resnet50-19c8e357.pth',
     backbone=dict(type='ResNet', depth=50),
     keypoint_head=dict(
         type='TopDownSimpleHead',
@@ -66,12 +66,12 @@ data_cfg = dict(
     oks_thr=0.9,
     vis_thr=0.2,
     bbox_thr=1.0,
-    use_gt_bbox=False,
+    use_gt_bbox=True,
     image_thr=0.0,
-    # bbox_file='data/coco/person_detection_results/'
-    # 'COCO_val2017_detections_AP_H_56_person.json',
     bbox_file='data/coco/person_detection_results/'
-    'COCO_val2017_detections_htc_multiscale.json',
+    'COCO_val2017_detections_AP_H_56_person.json',
+    # bbox_file='data/coco/person_detection_results/'
+    # 'COCO_val2017_detections_htc_multiscale.json',
 )
 
 train_pipeline = [
@@ -135,9 +135,9 @@ data = dict(
         data_cfg=data_cfg,
         pipeline=val_pipeline),
     test=dict(
-        type='TopDownCocoDataset',
-        ann_file=f'{data_root}/annotations/person_keypoints_val2017.json',
-        img_prefix=f'{data_root}/val2017/',
+        type='BottomUpCocoDataset',
+        ann_file=f'{data_root}/annotations/image_info_test-dev2017.json',
+        img_prefix=f'{data_root}/test2017/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
 )

@@ -420,6 +420,7 @@ class ResLayer(nn.Sequential):
 
 
 @BACKBONES.register_module()
+# ResNet = BACKBONE.register_module(ResNet)
 class ResNet(BaseBackbone):
     """ResNet backbone.
 

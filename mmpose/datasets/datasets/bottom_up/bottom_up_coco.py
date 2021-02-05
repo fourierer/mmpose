@@ -12,6 +12,7 @@ from .bottom_up_base_dataset import BottomUpBaseDataset
 
 
 @DATASETS.register_module()
+# BottomUpCocoDataset = DATASETS.register_module(BottomUpCocoDataset)
 class BottomUpCocoDataset(BottomUpBaseDataset):
     """COCO dataset for bottom-up pose estimation.
 
