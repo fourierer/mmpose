@@ -66,7 +66,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
         prog_bar = mmcv.ProgressBar(len(dataset))
     for data in data_loader:
         with torch.no_grad():
-            result = model(return_loss=False, **data)
+            result = model(return_loss=False, **data) # 调用TopDown类中的forward函数
         results.append(result)
 
         if rank == 0:
@@ -75,7 +75,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
             for _ in range(batch_size * world_size):
                 prog_bar.update()
 
-    # collect results from all ranks
+    # collect results from all ranks，如果gpu_colleck为True则所有的显卡都输出outputs，否则只在第一张显卡上输出
     if gpu_collect:
         results = collect_results_gpu(results, len(dataset))
     else:

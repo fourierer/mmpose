@@ -74,8 +74,10 @@ data_cfg = dict(
     image_thr=0.0,
     # bbox_file='data/coco/person_detection_results/'
     # 'COCO_val2017_detections_AP_H_56_person.json',
+    # bbox_file='data/coco/person_detection_results/'
+    # 'COCO_val2017_detections_htc_multiscale.json',
     bbox_file='data/coco/person_detection_results/'
-    'COCO_val2017_detections_htc_multiscale.json',
+    'COCO_test-dev2017_detections_AP_H_609_person.json'
 )
 
 train_pipeline = [
@@ -143,8 +145,8 @@ data = dict(
         pipeline=val_pipeline),
     test=dict(
         type='TopDownCocoDataset',
-        ann_file=f'{data_root}/annotations/person_keypoints_val2017.json',
-        img_prefix=f'{data_root}/val2017/',
+        ann_file=f'{data_root}/annotations/image_info_test-dev2017.json',
+        img_prefix=f'{data_root}/test2017/',
         data_cfg=data_cfg,
         pipeline=val_pipeline),
 )

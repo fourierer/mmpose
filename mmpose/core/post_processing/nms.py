@@ -105,7 +105,7 @@ def oks_nms(kpts_db, thr, sigmas=None, vis_thr=None):
     kpts = np.array([k['keypoints'].flatten() for k in kpts_db])
     areas = np.array([k['area'] for k in kpts_db])
 
-    order = scores.argsort()[::-1]
+    order = scores.argsort()[::-1] # 返回从大到小的顺序索引，并不是返回从大到小的数，如第2个数最大，第3个数第二大，第1个数最小，则返回np.array([2,3,1])
 
     keep = []
     while len(order) > 0:
@@ -113,9 +113,9 @@ def oks_nms(kpts_db, thr, sigmas=None, vis_thr=None):
         keep.append(i)
 
         oks_ovr = oks_iou(kpts[i], kpts[order[1:]], areas[i], areas[order[1:]],
-                          sigmas, vis_thr)
+                          sigmas, vis_thr) # 计算预测结果置信度最高的kpt和其他kpt之间的oks-iou，将置信度最高的作为ground truth kpt
 
-        inds = np.where(oks_ovr <= thr)[0]
+        inds = np.where(oks_ovr <= thr)[0] # oks-iou小于0.9的预测kpt才会被记录进order
         order = order[inds + 1]
 
     keep = np.array(keep)

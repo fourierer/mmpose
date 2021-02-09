@@ -11,6 +11,19 @@ from mmpose.apis import multi_gpu_test, single_gpu_test
 from mmpose.core import wrap_fp16_model
 from mmpose.datasets import build_dataloader, build_dataset
 from mmpose.models import build_posenet
+# for test-dev
+import json
+import numpy as np
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
 
 
 def parse_args():
@@ -98,27 +111,34 @@ def main():
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
-            # print(args.gpu_collect) # False
+        # print(args.gpu_collect) # False
         outputs = multi_gpu_test(model, data_loader, args.tmpdir,
                                  args.gpu_collect)
-    # print(type(outputs)) # list
-    # print(outputs)
+    
     rank, _ = get_dist_info()
     eval_config = cfg.get('eval_config', {})
     eval_config = merge_configs(eval_config, dict(metric=args.eval))
+    
     args.out = args.work_dir + '/test_dev2017_results_kps.json'
+
     if rank == 0:
         if args.out:
+            # output_file_path = args.work_dir + '/outputs.json'
+            # print(f'\nwirting oututs to {output_file_path}')
+            # print(type(outputs)) # list,需要在rank=0下进行outputs的相关操作，因为outputs只有第一张卡有输出
+            # with open(output_file_path,'w') as f:
+                # json.dump(outputs, f, cls=NpEncoder) # 需要加个NpEncoder类，因为outputs中有np.array，而json无法将array写入json文件
             print(f'\nwriting results to {args.out}')
             results = []
             for img in outputs:
                 for i, person in enumerate(img[0]):
                     kps = person[:, :3]
                     kps = kps.reshape((-1)).round(3).tolist()
-                    kps = [round(k, 3) for k in kps]
-                    score = round(float(img[1][i]), 3)
+                    kps = [round(k, 3) for k in kps] # 保留3位小数
+                    # score = round(float(img[1][i]), 3) # 第5位是bbox_score，/mmpose/mmpose/models/detectors/top_down.py 272行
+                    score = round(float(img[1][i][5]),3)
                     id = ''
-                    for key in img[2][66:78]:
+                    for key in img[2][19:31]:
                         id = id + key
                     results.append({
                         'category_id': int(1),
@@ -127,7 +147,6 @@ def main():
                         'score': score
                     })
             with open(args.out,'w') as fid:
-                import json
                 json.dump(results, fid)
             # mmcv.dump(outputs, args.out)
         print(dataset.evaluate(outputs, args.work_dir, **eval_config))
