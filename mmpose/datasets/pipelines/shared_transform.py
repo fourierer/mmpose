@@ -232,3 +232,19 @@ class Cutout:
             img = self._cutout(img)
         results['img'] = img
         return results
+
+
+@PIPELINES.register_module()
+class CenterMove:
+    """
+    Augmentation by move the center of box, keep other parameter unchanged
+    Args:
+        prob_center_move (float): Probability of performing moving center of the box.
+    """
+    def __init__(self, prob_center_move = 0.3):
+        self.prob_center_move = prob_center_move
+    def __call__(self, result):
+        if np.random.rand() < self.prob_center_move:
+            # result['center'] += 0.4 * (np.random.rand(2) - 0.5) * np.array([result['bbox'][2], result['bbox'][3]])
+            result['center'] += 0.4 * (np.random.rand(2) - 0.5) * [result['bbox'][2], result['bbox'][3]]
+        return result

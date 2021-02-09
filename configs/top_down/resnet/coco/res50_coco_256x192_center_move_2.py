@@ -66,18 +66,19 @@ data_cfg = dict(
     oks_thr=0.9,# 在data.evaluate中，预测结果中与ground truth kpt（实际上是预测结果中置信度最大的kpt）的oks-iou小于该阈值的会重新计入outputs
     vis_thr=0.2,# 在data.evaluate中，预测结果大于该阈值的关键点，会用于计算kpt_score
     bbox_thr=1.0,
-    use_gt_bbox=False,
+    use_gt_bbox=True,
     image_thr=0.0,
-    # bbox_file='data/coco/person_detection_results/'
-    # 'COCO_val2017_detections_AP_H_56_person.json',
+    bbox_file='data/coco/person_detection_results/'
+    'COCO_val2017_detections_AP_H_56_person.json',
     # bbox_file='data/coco/person_detection_results/'
     # 'COCO_val2017_detections_htc_multiscale.json',
-    bbox_file='data/coco/person_detection_results/'
-    'COCO_test-dev2017_detections_AP_H_609_person.json'
+    # bbox_file='data/coco/person_detection_results/'
+    # 'COCO_test-dev2017_detections_AP_H_609_person.json'
 )
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
+    dict(type='CenterMove'),
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
         type='TopDownHalfBodyTransform',

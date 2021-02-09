@@ -147,5 +147,6 @@ def train_model(model,
                            #  <mmcv.runner.hooks.logger.text.TextLoggerHook object at 0x7f4822d7b8d0>]
     # print(len(data_loaders[0])) # 149813/(cfg.data.get('samples_per_gpu')*gpus)
     # print(len(val_dataloader)) # 6352/gpus，因为val_dataloader的samples_per_gpu设置为1，并没有采用cfg中的samples_per_gpu
+    # print(runner._max_epochs) # None
     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
     
