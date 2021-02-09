@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-print('this is center_move branch')
+
 CONFIG=$1
 GPUS=$2
 PORT=${PORT:-29500}
