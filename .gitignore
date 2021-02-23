@@ -125,3 +125,5 @@ work_dirs/
 # data and model
 /data
 /work_dirs
+
+# config
