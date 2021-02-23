@@ -155,6 +155,7 @@ class DistEvalHook(EvalHook):
     def after_train_epoch(self, runner):
         """Called after each training epoch to evaluate the model."""
         if not self.every_n_epochs(runner, self.interval):
+            # 如果runner当前的epoch数不能整除self.interval，则返回
             return
 
         current_ckpt_path = osp.join(runner.work_dir,
